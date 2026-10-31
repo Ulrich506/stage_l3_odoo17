@@ -64,7 +64,10 @@ class EtatCivilGestionUtilisateur(models.TransientModel):
     )
 
     def _ensure_admin(self):
-        if not self.env.user.has_group("etat_civil.group_etat_civil_admin"):
+        if not (
+            self.env.user.has_group("etat_civil.group_etat_civil_admin")
+            or self.env.user.has_group("base.group_system")
+        ):
             raise AccessError(
                 "Seul un administrateur d'état civil peut gérer les comptes."
             )

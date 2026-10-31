@@ -45,12 +45,12 @@
                     <button name="action_valider_mention" string="Valider la mention"
                             type="object" class="btn-primary"
                             invisible="statut != 'brouillon'"
-                            groups="etat_civil.group_etat_civil_officier"/>
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"/>
                     <field name="statut" widget="statusbar" statusbar_visible="brouillon,valide"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <h1><field name="name" placeholder="Référence ou Libellé de la mention"/></h1>
+                        <h1><field name="name" placeholder="Référence attribuée automatiquement" readonly="1"/></h1>
                     </div>
                     <group>
                         <group string="Caractéristiques">

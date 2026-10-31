@@ -75,6 +75,36 @@ IMPORTABLE_FIELDS = {
 }
 
 
+def _create_exchange_log(
+    env,
+    operation,
+    state,
+    file_name,
+    file_format,
+    total_rows=0,
+    imported_rows=0,
+    updated_rows=0,
+    skipped_rows=0,
+    duplicate_rows=0,
+    error_rows=0,
+):
+    operation_label = _("Importation") if operation == "import" else _("Exportation")
+    env["etat.civil.exchange.log"].sudo().create({
+        "name": "%s — %s" % (operation_label, file_name or _("sans nom")),
+        "operation": operation,
+        "state": state,
+        "user_id": env.uid,
+        "file_name": file_name,
+        "file_format": file_format,
+        "total_rows": total_rows,
+        "imported_rows": imported_rows,
+        "updated_rows": updated_rows,
+        "skipped_rows": skipped_rows,
+        "duplicate_rows": duplicate_rows,
+        "error_rows": error_rows,
+    })
+
+
 class EtatCivilImportWizard(models.TransientModel):
     _name = 'etat.civil.import.wizard'
     _description = "Assistant d'importation des citoyens"
@@ -178,7 +208,10 @@ class EtatCivilImportWizard(models.TransientModel):
         raise UserError(_("Format '%s' non pris en charge.") % fmt)
 
     def _parse_csv(self, raw):
-        text = raw.decode('utf-8-sig', errors='replace')
+        try:
+            text = raw.decode('utf-8-sig')
+        except UnicodeDecodeError as exc:
+            raise UserError(_("Le fichier CSV n'est pas encodé en UTF-8.")) from exc
         reader = csv.DictReader(io.StringIO(text))
         return [dict(row) for row in reader]
 
@@ -231,6 +264,8 @@ class EtatCivilImportWizard(models.TransientModel):
 
     def _parse_xml(self, raw):
         import xml.etree.ElementTree as ET
+        if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():
+            raise UserError(_("Les déclarations DTD et entités XML ne sont pas autorisées."))
         root = ET.fromstring(raw)
         result = []
         # Support both <citoyens><citoyen>...</citoyen></citoyens>
@@ -283,17 +318,22 @@ class EtatCivilImportWizard(models.TransientModel):
         return result
 
     def _parse_zip(self, raw):
-        """Extract supported files from a ZIP archive (with Zip Slip protection)."""
+        """Parse supported files in an archive without extracting them."""
         total_decompressed = 0
         all_rows = []
         with zipfile.ZipFile(io.BytesIO(raw), 'r') as zf:
             for info in zf.infolist():
-                # Zip Slip protection
-                if info.filename.startswith('/') or '..' in info.filename:
-                    _logger.warning("Zip Slip attempt detected: %s", info.filename)
-                    continue
                 if info.is_dir():
                     continue
+                normalized_name = info.filename.replace('\\', '/')
+                if (
+                    normalized_name.startswith('/')
+                    or any(part == '..' for part in normalized_name.split('/'))
+                ):
+                    raise UserError(
+                        _("Le fichier ZIP contient un chemin non autorisé : %s")
+                        % info.filename
+                    )
                 total_decompressed += info.file_size
                 if total_decompressed > MAX_ZIP_TOTAL:
                     raise UserError(
@@ -315,7 +355,11 @@ class EtatCivilImportWizard(models.TransientModel):
                 try:
                     all_rows.extend(sub._parse_file(inner_raw))
                 except Exception as e:
-                    _logger.warning("Error parsing %s from ZIP: %s", info.filename, e)
+                    _logger.warning("Could not parse %s from uploaded ZIP: %s", info.filename, e)
+                    raise UserError(
+                        _("Impossible de lire le fichier « %s » contenu dans l'archive : %s")
+                        % (info.filename, str(e))
+                    ) from e
         return all_rows
 
     def action_detect_columns(self):
@@ -367,6 +411,22 @@ class EtatCivilImportWizard(models.TransientModel):
         return self._reopen_wizard()
 
     def action_import(self):
+        self.ensure_one()
+        try:
+            with self.env.cr.savepoint():
+                return self._action_import()
+        except Exception:
+            _create_exchange_log(
+                self.env,
+                "import",
+                "failed",
+                self.file_name,
+                self.file_format,
+                error_rows=1,
+            )
+            raise
+
+    def _action_import(self):
         """Step 3 → Step 4: Execute the actual import."""
         self.ensure_one()
         rows = self._parse_file()
@@ -397,53 +457,52 @@ class EtatCivilImportWizard(models.TransientModel):
             for idx, row in enumerate(batch):
                 line_num = batch_start + idx + 2  # +2 for header + 0-index
                 try:
-                    vals = self._map_row(row, active_mapping, line_num)
-                    if not vals:
-                        skipped += 1
-                        continue
-
-                    # Check for duplicates
-                    existing = self._find_duplicate(vals, Individu)
-                    if existing:
-                        duplicates += 1
-                        if self.duplicate_strategy == 'skip':
+                    with self.env.cr.savepoint():
+                        vals = self._map_row(row, active_mapping, line_num)
+                        if not vals:
                             skipped += 1
                             continue
-                        elif self.duplicate_strategy == 'update':
-                            # Only update non-empty values
-                            update_vals = {k: v for k, v in vals.items() if v}
-                            if 'cin' in update_vals:
-                                del update_vals['cin']  # Don't overwrite CIN on update
-                            if update_vals:
-                                existing.write(update_vals)
-                                updated += 1
-                            else:
+
+                        # Check for duplicates
+                        existing = self._find_duplicate(vals, Individu)
+                        if existing:
+                            duplicates += 1
+                            if self.duplicate_strategy == 'skip':
                                 skipped += 1
+                                continue
+                            elif self.duplicate_strategy == 'update':
+                                update_vals = {k: v for k, v in vals.items() if v}
+                                if 'cin' in update_vals:
+                                    del update_vals['cin']
+                                if update_vals:
+                                    existing.write(update_vals)
+                                    updated += 1
+                                else:
+                                    skipped += 1
+                                continue
+                            elif self.duplicate_strategy == 'report':
+                                error_details.append(
+                                    _("Ligne %d : doublon détecté (CIN: %s, Nom: %s %s).")
+                                    % (line_num, vals.get('cin', ''), vals.get('nom', ''), vals.get('prenoms', ''))
+                                )
+                                skipped += 1
+                                continue
+
+                        if not vals.get('nom'):
+                            error_details.append(_("Ligne %d : le nom est obligatoire.") % line_num)
+                            errors += 1
                             continue
-                        elif self.duplicate_strategy == 'report':
-                            error_details.append(
-                                _("Ligne %d : doublon détecté (CIN: %s, Nom: %s %s).")
-                                % (line_num, vals.get('cin', ''), vals.get('nom', ''), vals.get('prenoms', ''))
-                            )
-                            skipped += 1
+                        if not vals.get('sexe'):
+                            error_details.append(_("Ligne %d : le sexe est obligatoire.") % line_num)
+                            errors += 1
+                            continue
+                        if not vals.get('date_naissance'):
+                            error_details.append(_("Ligne %d : la date de naissance est obligatoire.") % line_num)
+                            errors += 1
                             continue
 
-                    # Validate required fields
-                    if not vals.get('nom'):
-                        error_details.append(_("Ligne %d : le nom est obligatoire.") % line_num)
-                        errors += 1
-                        continue
-                    if not vals.get('sexe'):
-                        error_details.append(_("Ligne %d : le sexe est obligatoire.") % line_num)
-                        errors += 1
-                        continue
-                    if not vals.get('date_naissance'):
-                        error_details.append(_("Ligne %d : la date de naissance est obligatoire.") % line_num)
-                        errors += 1
-                        continue
-
-                    Individu.create(vals)
-                    imported += 1
+                        Individu.create(vals)
+                        imported += 1
 
                 except ValidationError as e:
                     errors += 1
@@ -461,6 +520,19 @@ class EtatCivilImportWizard(models.TransientModel):
             error_file = base64.b64encode(report_text.encode('utf-8'))
             error_file_name = 'rapport_erreurs_import.txt'
 
+        _create_exchange_log(
+            self.env,
+            "import",
+            "partial" if errors else "success",
+            self.file_name,
+            self.file_format,
+            total_rows=total,
+            imported_rows=imported,
+            updated_rows=updated,
+            skipped_rows=skipped,
+            duplicate_rows=duplicates,
+            error_rows=errors,
+        )
         self.write({
             'state': 'done',
             'result_total': total,
@@ -679,6 +751,22 @@ class EtatCivilExportWizard(models.TransientModel):
 
     def action_export(self):
         self.ensure_one()
+        try:
+            with self.env.cr.savepoint():
+                return self._action_export()
+        except Exception:
+            _create_exchange_log(
+                self.env,
+                "export",
+                "failed",
+                False,
+                self.export_format,
+                error_rows=1,
+            )
+            raise
+
+    def _action_export(self):
+        self.ensure_one()
         records = self._get_records()
         field_list = self._get_fields()
         data = self._records_to_dicts(records, field_list)
@@ -703,6 +791,14 @@ class EtatCivilExportWizard(models.TransientModel):
             'result_count': len(data),
             'state': 'done',
         })
+        _create_exchange_log(
+            self.env,
+            "export",
+            "success",
+            fname,
+            fmt,
+            total_rows=len(data),
+        )
         return self._reopen_wizard()
 
     def _export_csv(self, data, field_list):

@@ -12,7 +12,7 @@
                     <!-- ÉTAPE 1 : Téléverser un fichier -->
                     <div invisible="state != 'upload'">
                         <div class="alert alert-info" role="alert">
-                            <i class="fa fa-upload me-2"/>
+                            <i class="fa fa-upload me-2" title="Téléverser"/>
                             <strong>Étape 1 :</strong> Sélectionnez un fichier de données à importer.
                             Formats acceptés : CSV, XLSX, XLS, JSON, XML, ODS ou ZIP.
                         </div>
@@ -28,7 +28,7 @@
                     <!-- ÉTAPE 2 : Correspondance des colonnes -->
                     <div invisible="state != 'mapping'">
                         <div class="alert alert-warning" role="alert">
-                            <i class="fa fa-columns me-2"/>
+                            <i class="fa fa-columns me-2" title="Correspondance"/>
                             <strong>Étape 2 :</strong> Vérifiez et ajustez la correspondance entre les colonnes du fichier et les champs Odoo.
                             Laissez vide pour ignorer une colonne.
                         </div>
@@ -53,7 +53,7 @@
                     <!-- ÉTAPE 3 : Aperçu -->
                     <div invisible="state != 'preview'">
                         <div class="alert alert-success" role="alert">
-                            <i class="fa fa-eye me-2"/>
+                            <i class="fa fa-eye me-2" title="Aperçu"/>
                             <strong>Étape 3 :</strong> Vérifiez l'aperçu des données ci-dessous avant de lancer l'importation.
                         </div>
                         <group>
@@ -66,7 +66,7 @@
                     <!-- ÉTAPE 4 : Résultat -->
                     <div invisible="state != 'done'">
                         <div class="alert alert-primary" role="alert">
-                            <i class="fa fa-check-circle me-2"/>
+                            <i class="fa fa-check-circle me-2" title="Succès"/>
                             <strong>Importation terminée.</strong>
                         </div>
                         <group>
@@ -130,7 +130,7 @@
                     <!-- Configuration -->
                     <div invisible="state != 'config'">
                         <div class="alert alert-info" role="alert">
-                            <i class="fa fa-download me-2"/>
+                            <i class="fa fa-download me-2" title="Télécharger"/>
                             Configurez les paramètres d'exportation puis cliquez sur « Exporter ».
                         </div>
                         <group>
@@ -144,7 +144,7 @@
                     <!-- Résultat -->
                     <div invisible="state != 'done'">
                         <div class="alert alert-success" role="alert">
-                            <i class="fa fa-check-circle me-2"/>
+                            <i class="fa fa-check-circle me-2" title="Succès"/>
                             <strong>Exportation terminée.</strong>
                             <field name="result_count" class="d-inline"/> citoyen(s) exporté(s).
                         </div>

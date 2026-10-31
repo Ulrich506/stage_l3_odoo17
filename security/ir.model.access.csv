@@ -52,3 +52,6 @@ access_etat_civil_export_wizard_agent,etat_civil.export.wizard.agent,model_etat_
 access_etat_civil_export_wizard_officier,etat_civil.export.wizard.officier,model_etat_civil_export_wizard,etat_civil.group_etat_civil_officier,1,1,1,1
 access_etat_civil_export_wizard_admin,etat_civil.export.wizard.admin,model_etat_civil_export_wizard,etat_civil.group_etat_civil_admin,1,1,1,1
 access_etat_civil_export_wizard_system,etat_civil.export.wizard.system,model_etat_civil_export_wizard,base.group_system,1,1,1,1
+access_etat_civil_exchange_log_admin,etat_civil.exchange.log.admin,model_etat_civil_exchange_log,etat_civil.group_etat_civil_admin,1,0,0,0
+access_etat_civil_exchange_log_system,etat_civil.exchange.log.system,model_etat_civil_exchange_log,base.group_system,1,1,1,1
+access_etat_civil_gestion_utilisateur_system,etat_civil.gestion.utilisateur.system,model_etat_civil_gestion_utilisateur,base.group_system,1,1,1,1

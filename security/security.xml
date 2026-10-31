@@ -51,4 +51,7 @@
         <field name="domain_force">[('registre_id.centre_id', 'in', user.etat_civil_centre_ids.ids)]</field>
         <field name="groups" eval="[(4, ref('group_etat_civil_agent'))]"/>
     </record>
+
+    <!-- System administrators receive direct ACLs without inheriting agent
+         record rules or being assigned to an operational role. -->
 </odoo>

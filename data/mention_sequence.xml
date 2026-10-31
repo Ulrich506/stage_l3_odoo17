@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="sequence_mention_mariage" model="ir.sequence">
+            <field name="name">Référence de mention de mariage</field>
+            <field name="code">etat.civil.mention.mariage</field>
+            <field name="prefix">MEN-MAR/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_divorce" model="ir.sequence">
+            <field name="name">Référence de mention de divorce</field>
+            <field name="code">etat.civil.mention.divorce</field>
+            <field name="prefix">DIV/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_deces" model="ir.sequence">
+            <field name="name">Référence de mention de décès</field>
+            <field name="code">etat.civil.mention.deces</field>
+            <field name="prefix">MEN-DEC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_reconnaissance" model="ir.sequence">
+            <field name="name">Référence de reconnaissance</field>
+            <field name="code">etat.civil.mention.reconnaissance</field>
+            <field name="prefix">REC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_adoption" model="ir.sequence">
+            <field name="name">Référence d'adoption</field>
+            <field name="code">etat.civil.mention.adoption</field>
+            <field name="prefix">ADO/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_veuvage" model="ir.sequence">
+            <field name="name">Référence de veuvage</field>
+            <field name="code">etat.civil.mention.veuvage</field>
+            <field name="prefix">MEN-VEU/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_rectification" model="ir.sequence">
+            <field name="name">Référence de rectification</field>
+            <field name="code">etat.civil.mention.rectification</field>
+            <field name="prefix">MEN-REC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_changement_nom" model="ir.sequence">
+            <field name="name">Référence de changement de nom</field>
+            <field name="code">etat.civil.mention.changement_nom</field>
+            <field name="prefix">CDN/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_mention_autre" model="ir.sequence">
+            <field name="name">Référence d'autre mention</field>
+            <field name="code">etat.civil.mention.autre</field>
+            <field name="prefix">MEN/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

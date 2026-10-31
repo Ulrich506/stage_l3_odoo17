@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_etat_civil_exchange_log_tree" model="ir.ui.view">
+        <field name="name">etat.civil.exchange.log.tree</field>
+        <field name="model">etat.civil.exchange.log</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" delete="0">
+                <field name="create_date"/>
+                <field name="user_id"/>
+                <field name="operation"/>
+                <field name="file_name"/>
+                <field name="file_format"/>
+                <field name="state"/>
+                <field name="total_rows"/>
+                <field name="imported_rows"/>
+                <field name="updated_rows"/>
+                <field name="skipped_rows"/>
+                <field name="duplicate_rows"/>
+                <field name="error_rows"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_etat_civil_exchange_log_form" model="ir.ui.view">
+        <field name="name">etat.civil.exchange.log.form</field>
+        <field name="model">etat.civil.exchange.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0" delete="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="operation"/>
+                            <field name="state"/>
+                            <field name="user_id"/>
+                            <field name="create_date"/>
+                        </group>
+                        <group>
+                            <field name="file_name"/>
+                            <field name="file_format"/>
+                            <field name="total_rows"/>
+                            <field name="imported_rows"/>
+                            <field name="updated_rows"/>
+                            <field name="skipped_rows"/>
+                            <field name="duplicate_rows"/>
+                            <field name="error_rows"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_exchange_log" model="ir.actions.act_window">
+        <field name="name">Journal des échanges de citoyens</field>
+        <field name="res_model">etat.civil.exchange.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_etat_civil_exchange_log_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_etat_civil_exchange_log_form')})]"/>
+    </record>
+</odoo>

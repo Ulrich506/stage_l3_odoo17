@@ -6,7 +6,12 @@ Odoo Web et l'application Flutter sont deux interfaces du même module serveur. 
 
 - Menus réduits aux tâches d’état civil ; pas de tableau de bord statistique.
 - Gestion des actes de naissance, mariage et décès.
+- Numérotation des actes à l'enregistrement avec séquences séparées par type d'acte.
+- Références automatiques distinctes pour les mentions de reconnaissance,
+  adoption, divorce, changement de nom et autres mentions.
 - Gestion des citoyens / individus.
+- Import des citoyens depuis CSV, XLSX, XLS, JSON, XML, ODS et ZIP ; export en CSV, XLSX, JSON, XML et ODS.
+- Journal des échanges accessible à l'administrateur d'état civil.
 - Suivi des pièces requises par procédure ; photos ou scans facultatifs et vérification réservée à l’officier.
 - Mentions marginales avec reconnaissance, adoption simple, mariage, divorce, décès, veuvage et changement de nom.
 - Notifications de mariage à suivre vers les communes de naissance.
@@ -26,7 +31,23 @@ Odoo Web et l'application Flutter sont deux interfaces du même module serveur. 
 - **Officier** : hérite des droits de l'agent et peut valider, annuler, archiver et, si nécessaire, marquer un acte comme rectifié. La rectification est une action facultative ; elle ne fait pas partie de la validation normale.
 - **Administrateur d'état civil** : supervise le module et gère les centres, registres et comptes utilisateurs. Il hérite des droits de consultation et de préparation de l'agent, mais pas des droits métier de validation et de signature de l'officier. Depuis **État Civil → Administration → Utilisateurs**, il peut créer un compte interne ou modifier son rôle, ses coordonnées, son mot de passe et son état actif. Les comptes sont désactivés plutôt que supprimés, afin de conserver la traçabilité. Cet accès ne confère pas les paramètres techniques d'administration Odoo.
 
+L'import XLS/XLSX et ODS requiert les bibliothèques Python `xlrd`, `openpyxl`
+et `odfpy` dans l'environnement Python utilisé par Odoo. Les opérations
+d'import/export sont consultables dans **État Civil → Administration → Journal
+des échanges de citoyens** ; le journal enregistre les résultats et compteurs,
+pas le contenu personnel des fichiers.
+
 Les groupes supérieurs héritent des groupes inférieurs. Le statut d'un acte ne peut pas être modifié directement : il doit passer par les actions autorisées afin d'éviter qu'un agent contourne la validation d'un officier.
+
+Les utilisateurs `base.group_system` disposent directement des droits du
+module, des menus et actions d'administration et de validation, sans être
+ajoutés aux rôles Agent, Officier ou Administrateur d'état civil. Ils ne sont
+donc pas soumis aux règles territoriales d'un agent. Les contrôles métier
+(motifs obligatoires, pièces justificatives, transitions et validations) restent
+actifs. Les numéros d'actes sont attribués à la création avec les séquences
+existantes ; les références des mentions suivent des séquences `no_gap`
+distinctes par type. Les données de séquence sont déclarées sans réinitialisation
+lors des mises à jour du module.
 
 ## File d'attente et API mobile
 

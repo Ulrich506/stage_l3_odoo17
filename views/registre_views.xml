@@ -70,8 +70,8 @@
         <field name="arch" type="xml">
             <form string="Registre annuel">
                 <header>
-                    <button name="action_cloturer_registre" string="Clôturer" type="object" class="btn-primary" invisible="est_cloture" groups="etat_civil.group_etat_civil_admin" confirm="Clôturer ce registre ? Plus aucun acte ne pourra y être rattaché tant qu'il n'est pas rouvert."/>
-                    <button name="action_rouvrir_registre" string="Rouvrir" type="object" class="btn-secondary" invisible="not est_cloture" groups="etat_civil.group_etat_civil_admin" confirm="Rouvrir ce registre clôturé ?"/>
+                    <button name="action_cloturer_registre" string="Clôturer" type="object" class="btn-primary" invisible="est_cloture" groups="etat_civil.group_etat_civil_admin,base.group_system" confirm="Clôturer ce registre ? Plus aucun acte ne pourra y être rattaché tant qu'il n'est pas rouvert."/>
+                    <button name="action_rouvrir_registre" string="Rouvrir" type="object" class="btn-secondary" invisible="not est_cloture" groups="etat_civil.group_etat_civil_admin,base.group_system" confirm="Rouvrir ce registre clôturé ?"/>
                 </header>
                 <sheet>
                     <div class="oe_title"><h1><field name="designation" readonly="1"/></h1></div>

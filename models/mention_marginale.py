@@ -9,7 +9,7 @@ class EtatCivilMentionMarginale(models.Model):
     _description = 'Mention marginale d’état civil'
     _order = 'date_mention desc, id desc'
 
-    name = fields.Char(string='Référence', required=True)
+    name = fields.Char(string='Référence', required=True, readonly=True)
     type_mention = fields.Selection([
         ('mariage', 'Mariage'),
         ('divorce', 'Divorce'),
@@ -82,6 +82,30 @@ class EtatCivilMentionMarginale(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         self._ensure_officier()
+        sequence_by_type = {
+            'mariage': 'etat.civil.mention.mariage',
+            'divorce': 'etat.civil.mention.divorce',
+            'deces': 'etat.civil.mention.deces',
+            'reconnaissance': 'etat.civil.mention.reconnaissance',
+            'adoption': 'etat.civil.mention.adoption',
+            'veuvage': 'etat.civil.mention.veuvage',
+            'rectification': 'etat.civil.mention.rectification',
+            'changement_nom': 'etat.civil.mention.changement_nom',
+            'autre': 'etat.civil.mention.autre',
+        }
+        for vals in vals_list:
+            if not (vals.get('name') or '').strip():
+                sequence_code = sequence_by_type.get(
+                    vals.get('type_mention'),
+                    'etat.civil.mention.autre',
+                )
+                sequence = self.env['ir.sequence'].sudo()
+                reference = sequence.next_by_code(sequence_code)
+                while reference and self.sudo().search_count([('name', '=', reference)]):
+                    reference = sequence.next_by_code(sequence_code)
+                if not reference:
+                    raise ValidationError("La séquence de référence de cette mention n'est pas configurée.")
+                vals['name'] = reference
         birth_model = self.env['etat.civil.acte.naissance']
         for vals in vals_list:
             if vals.get('personne_concernee_id') and not any(
@@ -113,7 +137,10 @@ class EtatCivilMentionMarginale(models.Model):
         return records
 
     def _ensure_officier(self):
-        if not self.env.user.has_group('etat_civil.group_etat_civil_officier'):
+        if not (
+            self.env.user.has_group('etat_civil.group_etat_civil_officier')
+            or self.env.user.has_group('base.group_system')
+        ):
             raise AccessError("Seul un officier d'état civil peut gérer les mentions marginales.")
 
     def _pieces_owner_field(self):

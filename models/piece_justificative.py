@@ -190,5 +190,8 @@ class EtatCivilPieceJustificative(models.Model):
         return result
 
     def _ensure_verificateur(self):
-        if not self.env.user.has_group("etat_civil.group_etat_civil_officier"):
+        if not (
+            self.env.user.has_group("etat_civil.group_etat_civil_officier")
+            or self.env.user.has_group("base.group_system")
+        ):
             raise AccessError("Seul un officier peut vérifier une pièce justificative.")

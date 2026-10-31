@@ -493,7 +493,10 @@ class EtatCivilApiController(http.Controller):
             'login': user.login,
             'is_agent': user.has_group('etat_civil.group_etat_civil_agent'),
             'is_officier': user.has_group('etat_civil.group_etat_civil_officier'),
-            'is_admin': user.has_group('etat_civil.group_etat_civil_admin'),
+            'is_admin': (
+                user.has_group('etat_civil.group_etat_civil_admin')
+                or user.has_group('base.group_system')
+            ),
         })
 
     # -------------------------------------------------------------------------
@@ -578,6 +581,24 @@ class EtatCivilApiController(http.Controller):
                 vals['cin'] = legacy_cin
             if vals:
                 individu.write(vals)
+            return self._response(self._serialize_individu(individu))
+        except Exception as error:
+            return self._handle_error(error)
+
+    @http.route(
+        '/api/v1/personnes/<int:personne_id>',
+        type='http',
+        auth='user',
+        methods=['GET'],
+        csrf=False,
+    )
+    def get_personne(self, personne_id, **kwargs):
+        try:
+            individu = request.env['etat.civil.individu'].browse(personne_id).exists()
+            if not individu:
+                return self._response({'error': 'Citoyen introuvable.'}, status=404)
+            individu.check_access_rights('read')
+            individu.check_access_rule('read')
             return self._response(self._serialize_individu(individu))
         except Exception as error:
             return self._handle_error(error)
@@ -678,7 +699,10 @@ class EtatCivilApiController(http.Controller):
             domain = []
             statut = request.httprequest.args.get('statut')
             if statut:
-                allowed_statuses = {'brouillon', 'valide', 'rectifie', 'annule', 'archive'}
+                allowed_statuses = {
+                    'brouillon', 'en_attente', 'a_corriger',
+                    'valide', 'rectifie', 'annule', 'archive',
+                }
                 if statut not in allowed_statuses:
                     raise ValidationError('Le statut demandé est invalide.')
                 domain.append(('statut', '=', statut))
@@ -761,7 +785,10 @@ class EtatCivilApiController(http.Controller):
             domain = []
             statut = request.httprequest.args.get('statut')
             if statut:
-                allowed_statuses = {'brouillon', 'valide', 'rectifie', 'annule', 'archive'}
+                allowed_statuses = {
+                    'brouillon', 'en_attente', 'a_corriger',
+                    'valide', 'rectifie', 'annule', 'archive',
+                }
                 if statut not in allowed_statuses:
                     raise ValidationError('Le statut demandé est invalide.')
                 domain.append(('statut', '=', statut))
@@ -846,7 +873,10 @@ class EtatCivilApiController(http.Controller):
             domain = []
             statut = request.httprequest.args.get('statut')
             if statut:
-                allowed_statuses = {'brouillon', 'valide', 'rectifie', 'annule', 'archive'}
+                allowed_statuses = {
+                    'brouillon', 'en_attente', 'a_corriger',
+                    'valide', 'rectifie', 'annule', 'archive',
+                }
                 if statut not in allowed_statuses:
                     raise ValidationError('Le statut demandé est invalide.')
                 domain.append(('statut', '=', statut))
@@ -1014,6 +1044,57 @@ class EtatCivilApiController(http.Controller):
     # -------------------------------------------------------------------------
     # MENTIONS MARGINALES
     # -------------------------------------------------------------------------
+
+    @http.route(
+        ['/api/v1/mentions', '/api/v1/personnes/<int:personne_id>/mentions'],
+        type='http',
+        auth='user',
+        methods=['GET'],
+        csrf=False,
+    )
+    def list_mentions(self, personne_id=None, **kwargs):
+        try:
+            page = self._query_int('page', 1, 1, 1000000)
+            page_size = self._query_int('page_size', 25, 1, 100)
+            model = request.env['etat.civil.mention.marginale']
+            domain = []
+            if personne_id:
+                person = request.env['etat.civil.individu'].browse(personne_id).exists()
+                if not person:
+                    return self._response({'error': 'Citoyen introuvable.'}, status=404)
+                person.check_access_rights('read')
+                person.check_access_rule('read')
+                domain = [
+                    '|', '|',
+                    ('personne_concernee_id', '=', person.id),
+                    ('individu_id', '=', person.id),
+                    ('acte_naissance_id.enfant_id', '=', person.id),
+                ]
+            mention_type = request.httprequest.args.get('type')
+            if mention_type:
+                if mention_type not in model._fields['type_mention'].get_values(model.env):
+                    raise ValidationError('Le type de mention demandé est invalide.')
+                domain.append(('type_mention', '=', mention_type))
+            statut = request.httprequest.args.get('statut')
+            if statut:
+                if statut not in model._fields['statut'].get_values(model.env):
+                    raise ValidationError('Le statut demandé est invalide.')
+                domain.append(('statut', '=', statut))
+            total = model.search_count(domain)
+            mentions = model.search(
+                domain,
+                order='date_mention desc, id desc',
+                offset=(page - 1) * page_size,
+                limit=page_size,
+            )
+            return self._response({
+                'page': page,
+                'page_size': page_size,
+                'total': total,
+                'data': [self._serialize_mention(mention) for mention in mentions],
+            })
+        except Exception as error:
+            return self._handle_error(error)
 
     @http.route(
         '/api/v1/actes/<string:acte_type>/<int:acte_id>/mentions',

@@ -4,9 +4,11 @@ import csv
 import io
 import json
 import xml.etree.ElementTree as ET
+import zipfile
 
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
+from odoo.tools import mute_logger
 
 
 @tagged("post_install", "-at_install")
@@ -90,7 +92,7 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         self.assertEqual(enfant1.cin, "201999888777")
 
         # Doublon de CIN -> ValidationError
-        with self.assertRaises(ValidationError):
+        with mute_logger("odoo.sql_db"), self.assertRaises(ValidationError):
             self.Individu.create({
                 "nom": "Rabe",
                 "prenoms": "Doublon",
@@ -181,6 +183,26 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         # Le numéro d'acte doit être vide dans le draft
         self.assertFalse(draft_form.numero_acte)
 
+        invalid_child = self.Individu.create({
+            "nom": "Invalide",
+            "sexe": "M",
+            "date_naissance": "2026-10-31",
+        })
+        invalid_mother = self.Individu.create({
+            "nom": "Mere invalide",
+            "sexe": "F",
+            "date_naissance": "1995-01-01",
+        })
+        with self.assertRaises(ValidationError):
+            with self.env.cr.savepoint():
+                self.ActeNaissance.create({
+                    "registre_id": self.reg_mariage.id,
+                    "enfant_id": invalid_child.id,
+                    "mere_id": invalid_mother.id,
+                    "lieu_naissance": "Maternité",
+                    "texte_integral_acte": "Acte de test invalide",
+                })
+
         # Enregistrer un premier acte
         enfant1 = self.Individu.create({
             "nom": "Premier",
@@ -202,6 +224,8 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         num1 = acte1.numero_acte
         self.assertTrue(num1.startswith("NAI/"))
         num1_seq = int(num1.split("/")[-1])
+
+        acte1.write({"texte_integral_acte": "Texte corrigé"})
 
         # Ouvrir un autre formulaire puis l'abandonner
         draft2 = self.ActeNaissance.new({
@@ -228,6 +252,26 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         # Vérifier que les numéros se suivent rigoureusement (+1, aucun trou)
         self.assertEqual(num2_seq, num1_seq + 1, "Le compteur ne doit pas avoir sauté de numéro")
 
+    def test_17_zip_import_reports_invalid_inner_file(self):
+        """Une erreur dans un fichier d'archive ZIP doit être visible, pas ignorée."""
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as zip_file:
+            zip_file.writestr("citoyens.json", "{invalid json")
+
+        wizard = self.env["etat.civil.import.wizard"].create({
+            "file_data": base64.b64encode(archive.getvalue()),
+            "file_name": "citoyens.zip",
+            "column_mapping": "{}",
+        })
+        with self.assertRaisesRegex(UserError, "citoyens.json"):
+            wizard.action_import()
+        log = self.env["etat.civil.exchange.log"].sudo().search([
+            ("operation", "=", "import"),
+            ("file_name", "=", "citoyens.zip"),
+        ], limit=1)
+        self.assertTrue(log)
+        self.assertEqual(log.state, "failed")
+
     def test_06_sequences_independantes_mariage_et_deces(self):
         """Chaque type d'acte (naissance, mariage, décès) possède sa propre séquence indépendante."""
         epoux = self.Individu.create({"nom": "Epoux", "sexe": "M", "date_naissance": "1990-01-01"})
@@ -243,6 +287,7 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
             "temoin_2_id": temoin2.id,
             "date_mariage": "2026-10-31",
             "lieu_mariage": "Mairie",
+            "regime_matrimonial": "communaute_biens",
             "texte_integral_acte": "Texte mariage",
         })
         self.assertTrue(mariage.numero_acte.startswith("MAR/"))
@@ -302,6 +347,13 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         self.assertEqual(p.nom, "Andria")
         self.assertEqual(p.prenoms, "Paul")
         self.assertEqual(p.sexe, "M")
+        log = self.env["etat.civil.exchange.log"].sudo().search([
+            ("operation", "=", "import"),
+            ("file_name", "=", "citoyens.csv"),
+        ], limit=1)
+        self.assertTrue(log)
+        self.assertEqual(log.state, "success")
+        self.assertEqual(log.imported_rows, 2)
 
     def test_08_import_json(self):
         """Test importation d'un fichier JSON."""
@@ -377,6 +429,76 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         self.assertTrue(c)
         self.assertEqual(c.nom, "XlsxNom")
 
+    def test_14_import_xls(self):
+        """Test importation d'un fichier Excel ancien (.xls)."""
+        import xlwt
+        workbook = xlwt.Workbook()
+        sheet = workbook.add_sheet("Citoyens")
+        for column, value in enumerate(["nom", "prenoms", "sexe", "date_naissance", "cin"]):
+            sheet.write(0, column, value)
+        for column, value in enumerate(["XlsNom", "XlsPrenom", "F", "1998-07-06", "101444555667"]):
+            sheet.write(1, column, value)
+        buffer = io.BytesIO()
+        workbook.save(buffer)
+
+        wizard = self.env["etat.civil.import.wizard"].create({
+            "file_data": base64.b64encode(buffer.getvalue()),
+            "file_name": "citoyens.xls",
+        })
+        wizard.action_detect_columns()
+        wizard.action_import()
+        self.assertEqual(wizard.result_imported, 1)
+        self.assertTrue(self.Individu.search([("cin", "=", "101444555667")]))
+
+    def test_15_import_ods(self):
+        """Test importation d'un fichier ODS."""
+        from odf.opendocument import OpenDocumentSpreadsheet
+        from odf.table import Table, TableCell, TableRow
+        from odf.text import P
+
+        document = OpenDocumentSpreadsheet()
+        table = Table(name="Citoyens")
+        for values in (
+            ["nom", "prenoms", "sexe", "date_naissance", "cin"],
+            ["OdsNom", "OdsPrenom", "M", "1997-06-05", "101444555668"],
+        ):
+            row = TableRow()
+            for value in values:
+                cell = TableCell()
+                cell.addElement(P(text=value))
+                row.addElement(cell)
+            table.addElement(row)
+        document.spreadsheet.addElement(table)
+        buffer = io.BytesIO()
+        document.save(buffer)
+
+        wizard = self.env["etat.civil.import.wizard"].create({
+            "file_data": base64.b64encode(buffer.getvalue()),
+            "file_name": "citoyens.ods",
+        })
+        wizard.action_detect_columns()
+        wizard.action_import()
+        self.assertEqual(wizard.result_imported, 1)
+        self.assertTrue(self.Individu.search([("cin", "=", "101444555668")]))
+
+    def test_16_import_valid_zip(self):
+        """Test importation d'un fichier CSV contenu dans une archive ZIP."""
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as zip_file:
+            zip_file.writestr(
+                "citoyens.csv",
+                "nom,prenoms,sexe,date_naissance,cin\nZipNom,ZipPrenom,F,1996-05-04,101444555669\n",
+            )
+
+        wizard = self.env["etat.civil.import.wizard"].create({
+            "file_data": base64.b64encode(archive.getvalue()),
+            "file_name": "citoyens.zip",
+        })
+        wizard.action_detect_columns()
+        wizard.action_import()
+        self.assertEqual(wizard.result_imported, 1)
+        self.assertTrue(self.Individu.search([("cin", "=", "101444555669")]))
+
     def test_11_detection_doublons_et_strategies(self):
         """Test détection des doublons avec stratégies skip, update et report."""
         # Créer un citoyen existant
@@ -418,7 +540,7 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         w_upd.action_detect_columns()
         w_upd.action_import()
         self.assertEqual(w_upd.result_updated, 1)
-        c.refresh()
+        c.invalidate_recordset(["domicile_actuel"])
         self.assertEqual(c.domicile_actuel, "Nouveau domicile", "Le domicile doit être mis à jour avec update")
 
         # 3. Stratégie 'report'
@@ -447,6 +569,12 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         self.assertEqual(export_w.state, "done")
         self.assertTrue(export_w.result_file)
         self.assertEqual(export_w.result_file_name, "citoyens_export.csv")
+        export_log = self.env["etat.civil.exchange.log"].sudo().search([
+            ("operation", "=", "export"),
+            ("file_name", "=", "citoyens_export.csv"),
+        ], limit=1)
+        self.assertTrue(export_log)
+        self.assertEqual(export_log.state, "success")
 
         # Test export JSON
         export_json = self.env["etat.civil.export.wizard"].create({
@@ -474,3 +602,91 @@ class TestNouveauNeSequenceImportExport(TransactionCase):
         export_xlsx.action_export()
         self.assertTrue(export_xlsx.result_file)
         self.assertEqual(export_xlsx.result_file_name, "citoyens_export.xlsx")
+
+        # Test export ODS
+        export_ods = self.env["etat.civil.export.wizard"].create({
+            "export_format": "ods",
+            "export_filter": "all",
+        })
+        export_ods.action_export()
+        self.assertTrue(export_ods.result_file)
+        self.assertEqual(export_ods.result_file_name, "citoyens_export.ods")
+
+    def test_18_mentions_generate_type_specific_references(self):
+        """New mentions get independent references and existing references remain unchanged."""
+        person = self.Individu.create({
+            "nom": "Mention",
+            "sexe": "F",
+            "date_naissance": "1994-04-04",
+        })
+        expected_prefixes = {
+            "reconnaissance": "REC/",
+            "adoption": "ADO/",
+            "divorce": "DIV/",
+            "changement_nom": "CDN/",
+            "autre": "MEN/",
+        }
+        references = {}
+        for mention_type, prefix in expected_prefixes.items():
+            mention = self.env["etat.civil.mention.marginale"].create({
+                "type_mention": mention_type,
+                "date_mention": "2026-10-31",
+                "contenu": "Mention de test",
+                "individu_id": person.id,
+            })
+            self.assertTrue(mention.name.startswith(prefix))
+            references[mention_type] = mention.name
+            mention.write({"contenu": "Mention modifiée"})
+            self.assertEqual(mention.name, references[mention_type])
+
+        self.assertEqual(len(set(references.values())), len(references))
+
+    def test_19_system_admin_has_direct_module_access(self):
+        """The system group gets module access without being assigned operational roles."""
+        system_group = self.env.ref("base.group_system")
+        system_user = self.env["res.users"].create({
+            "name": "État Civil System Access Test",
+            "login": "etat-civil-system-access-test",
+            "groups_id": [(6, 0, [system_group.id])],
+        })
+        self.assertTrue(system_user.has_group("base.group_system"))
+        for group_xmlid in (
+            "etat_civil.group_etat_civil_agent",
+            "etat_civil.group_etat_civil_officier",
+            "etat_civil.group_etat_civil_admin",
+        ):
+            self.assertFalse(system_user.has_group(group_xmlid))
+
+        models_with_full_access = (
+            "etat.civil.individu",
+            "etat.civil.centre",
+            "etat.civil.registre",
+            "etat.civil.acte.naissance",
+            "etat.civil.acte.mariage",
+            "etat.civil.acte.deces",
+            "etat.civil.mention.marginale",
+            "etat.civil.piece.justificative",
+            "etat.civil.demande.guichet",
+            "etat.civil.gestion.utilisateur",
+            "etat.civil.exchange.log",
+            "etat.civil.annulation.acte.wizard",
+            "etat.civil.transmission.acte.wizard",
+            "etat.civil.retour.correction.wizard",
+            "etat.civil.import.wizard",
+            "etat.civil.export.wizard",
+        )
+        for model_name in models_with_full_access:
+            model = self.env[model_name].with_user(system_user)
+            for operation in ("read", "create", "write", "unlink"):
+                model.check_access_rights(operation)
+
+        person = self.env["etat.civil.individu"].with_user(system_user).create({
+            "nom": "Administrateur",
+            "sexe": "M",
+            "date_naissance": "1980-01-01",
+        })
+        person.write({"domicile_actuel": "Centre"})
+        person.unlink()
+
+        self.ActeNaissance.with_user(system_user)._ensure_officier()
+        self.env["etat.civil.mention.marginale"].with_user(system_user)._ensure_officier()

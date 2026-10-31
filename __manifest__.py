@@ -10,6 +10,7 @@
         "security/ir.model.access.csv",
         "data/demande_guichet_sequence.xml",
         "data/acte_sequence.xml",
+        "data/mention_sequence.xml",
         "views/individu_views.xml",
         "views/registre_views.xml",
         "reports/actes_reports.xml",
@@ -22,6 +23,7 @@
         "views/registry_actions.xml",
         "views/wizard_views.xml",
         "views/import_export_views.xml",
+        "views/import_export_log_views.xml",
         "views/menus.xml",
     ],
     "assets": {

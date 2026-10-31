@@ -83,6 +83,17 @@ class EtatCivilIndividu(models.Model):
             if record.cin and not re.fullmatch(r'[0-9]{12}', record.cin):
                 raise ValidationError('Le numéro de CIN doit contenir exactement 12 chiffres.')
 
+    @api.constrains('cin')
+    def _check_cin_unique(self):
+        for record in self:
+            if record.cin:
+                duplicate = self.search([
+                    ('id', '!=', record.id),
+                    ('cin', '=', record.cin),
+                ], limit=1)
+                if duplicate:
+                    raise ValidationError("Le numéro de CIN doit être unique.")
+
     @api.model
     def _default_cin_for_newborn(self):
         return False
@@ -106,6 +117,8 @@ class EtatCivilIndividu(models.Model):
                 vals['cin'] = legacy_cin
             if 'cin' in vals and vals['cin'] not in (None, ''):
                 vals['cin'] = self._normalize_cin(vals['cin'])
+                if vals['cin'] and self.search_count([('cin', '=', vals['cin'])]) > 0:
+                    raise ValidationError("Le numéro de CIN doit être unique.")
         return super().create(vals_list)
 
     def write(self, vals):
@@ -116,6 +129,8 @@ class EtatCivilIndividu(models.Model):
             vals['cin'] = legacy_cin
         if 'cin' in vals and vals['cin'] not in (None, ''):
             vals['cin'] = self._normalize_cin(vals['cin'])
+            if vals['cin'] and self.search_count([('id', 'not in', self.ids), ('cin', '=', vals['cin'])]) > 0:
+                raise ValidationError("Le numéro de CIN doit être unique.")
         return super().write(vals)
 
     @api.depends('nom', 'prenoms')

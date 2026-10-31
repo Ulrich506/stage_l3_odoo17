@@ -65,7 +65,10 @@ class EtatCivilRegistre(models.Model):
                 raise ValidationError("Un registre clôturé doit avoir une date de clôture.")
 
     def action_cloturer_registre(self):
-        if not self.env.user.has_group('etat_civil.group_etat_civil_admin'):
+        if not (
+            self.env.user.has_group('etat_civil.group_etat_civil_admin')
+            or self.env.user.has_group('base.group_system')
+        ):
             raise ValidationError("Seul l'administrateur d'état civil peut clôturer un registre.")
         for record in self:
             if record.est_cloture:
@@ -76,7 +79,10 @@ class EtatCivilRegistre(models.Model):
             })
 
     def action_rouvrir_registre(self):
-        if not self.env.user.has_group('etat_civil.group_etat_civil_admin'):
+        if not (
+            self.env.user.has_group('etat_civil.group_etat_civil_admin')
+            or self.env.user.has_group('base.group_system')
+        ):
             raise ValidationError("Seul l'administrateur d'état civil peut rouvrir un registre.")
         for record in self:
             if not record.est_cloture:

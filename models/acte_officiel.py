@@ -20,6 +20,7 @@ class EtatCivilActeOfficiel(models.AbstractModel):
         string="Numéro d'acte",
         required=False,
         copy=False,
+        readonly=True,
         tracking=True,
     )
     feuillet_numero = fields.Integer(string="N° de feuillet", required=True)
@@ -128,12 +129,17 @@ class EtatCivilActeOfficiel(models.AbstractModel):
                 raise ValidationError("Le motif d'annulation est obligatoire.")
 
     def _ensure_officier(self):
-        if not self.env.user.has_group("etat_civil.group_etat_civil_officier"):
+        if not (
+            self.env.user.has_group("etat_civil.group_etat_civil_officier")
+            or self.env.user.has_group("base.group_system")
+        ):
             raise UserError("Seul un officier d'état civil peut effectuer cette opération.")
 
     def _ensure_competence_territoriale(self):
         self.ensure_one()
         user = self.env.user
+        if user.has_group("base.group_system"):
+            return
         centre = self.registre_id.centre_id
         if not centre or centre not in user.etat_civil_centre_ids:
             raise AccessError(
@@ -259,6 +265,10 @@ class EtatCivilActeOfficiel(models.AbstractModel):
                 })
                 numero = seq.next_by_id()
 
+        while numero and self.sudo().search_count([("numero_acte", "=", numero)]):
+            numero = seq_model.next_by_code(cfg["code"])
+        if not numero:
+            raise UserError(_("Impossible de générer un numéro d'acte avec la séquence configurée."))
         return numero
 
     @api.model
@@ -337,7 +347,10 @@ class EtatCivilActeOfficiel(models.AbstractModel):
         return officier
 
     def action_envoyer_validation(self, officier=None, notes=None):
-        if not self.env.user.has_group("etat_civil.group_etat_civil_agent"):
+        if not (
+            self.env.user.has_group("etat_civil.group_etat_civil_agent")
+            or self.env.user.has_group("base.group_system")
+        ):
             raise AccessError(_("Seul un agent d'état civil peut transmettre un dossier pour validation."))
         if not self:
             raise UserError(_("Sélectionnez au moins un dossier à transmettre."))
@@ -757,6 +770,9 @@ class EtatCivilActeOfficiel(models.AbstractModel):
                 if record.statut in {"valide", "rectifie", "annule", "archive"}:
                     if set(vals) == {"mention_ids"} and self.env.user.has_group(
                         "etat_civil.group_etat_civil_officier"
+                    ) or (
+                        set(vals) == {"mention_ids"}
+                        and self.env.user.has_group("base.group_system")
                     ):
                         continue
                     raise UserError(

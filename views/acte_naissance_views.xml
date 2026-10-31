@@ -33,10 +33,10 @@
             <tree string="Actes de naissance" class="ec_list_view">
                 <header>
                     <button name="action_envoyer_validation" type="object" string="Envoyer pour validation"
-                            class="btn-primary" groups="etat_civil.group_etat_civil_agent"/>
+                            class="btn-primary" groups="etat_civil.group_etat_civil_agent,base.group_system"/>
                 </header>
                 <button name="action_envoyer_validation" string="Envoyer pour validation" type="object"
-                        class="btn-primary" groups="etat_civil.group_etat_civil_agent"
+                        class="btn-primary" groups="etat_civil.group_etat_civil_agent,base.group_system"
                         invisible="statut not in ('brouillon', 'a_corriger')"/>
                 <field name="numero_acte"/>
                 <field name="enfant_id"/>
@@ -81,7 +81,7 @@
                             </div>
                             <div class="mt-2" invisible="statut not in ('brouillon', 'a_corriger')">
                                 <button name="action_envoyer_validation" type="object" class="btn btn-primary btn-sm"
-                                        groups="etat_civil.group_etat_civil_agent">
+                                        groups="etat_civil.group_etat_civil_agent,base.group_system">
                                     Envoyer pour validation
                                 </button>
                             </div>
@@ -99,27 +99,27 @@
             <form string="Acte de naissance" class="ec_form_view">
                 <header>
                     <button name="action_envoyer_validation" string="Envoyer pour validation" type="object"
-                            class="btn-primary" groups="etat_civil.group_etat_civil_agent"
+                            class="btn-primary" groups="etat_civil.group_etat_civil_agent,base.group_system"
                             invisible="statut not in ('brouillon', 'a_corriger')"/>
                     <button name="action_valider_acte" string="Valider l'acte" type="object"
                             class="btn-success" invisible="statut not in ('en_attente', 'brouillon')"
-                            groups="etat_civil.group_etat_civil_officier"/>
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"/>
                     <button name="action_demander_correction" string="Renvoyer pour correction" type="object"
                             class="btn-warning" invisible="statut != 'en_attente'"
-                            groups="etat_civil.group_etat_civil_officier"/>
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"/>
                     <button name="action_ouvrir_refus" string="Refuser" type="object"
                             class="btn-danger" invisible="statut != 'en_attente'"
-                            groups="etat_civil.group_etat_civil_officier"/>
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"/>
                     <button name="action_ouvrir_annulation" string="Annuler" type="object"
                             class="btn-danger" invisible="statut != 'valide'"
-                            groups="etat_civil.group_etat_civil_officier"/>
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"/>
                     <button name="action_rectifier_acte" string="Rectifier (si nécessaire)" type="object"
                             class="btn-secondary" invisible="statut != 'valide'"
-                            groups="etat_civil.group_etat_civil_officier"
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"
                             confirm="La rectification est facultative. Utilisez-la seulement si une correction officielle est nécessaire ; l'acte sera verrouillé. Ajoutez le détail dans les mentions marginales."/>
                     <button name="action_archiver_acte" string="Archiver" type="object"
                             class="btn-secondary" invisible="statut != 'annule'"
-                            groups="etat_civil.group_etat_civil_officier"
+                            groups="etat_civil.group_etat_civil_officier,base.group_system"
                             confirm="Archiver cet acte annulé ? Cette action est définitive."/>
                     <button name="%(action_report_acte_naissance)d" string="Imprimer" type="action"
                             class="btn-secondary" invisible="statut == 'brouillon'"/>
@@ -149,7 +149,7 @@
                     </group>
                     <group class="ec_section">
                         <group string="Informations de l'acte">
-                            <field name="numero_acte"/>
+                            <field name="numero_acte" readonly="1"/>
                             <field name="feuillet_numero"/>
                             <field name="registre_id" options="{'no_create': True}"/>
                             <field name="date_dressage"/>
