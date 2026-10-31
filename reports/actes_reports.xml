@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_acte_naissance" model="ir.actions.report">
+        <field name="name">Acte de Naissance</field>
+        <field name="model">etat.civil.acte.naissance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">etat_civil.report_acte_naissance</field>
+        <field name="report_file">etat_civil.report_acte_naissance</field>
+        <field name="binding_model_id" ref="model_etat_civil_acte_naissance"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_acte_mariage" model="ir.actions.report">
+        <field name="name">Acte de Mariage</field>
+        <field name="model">etat.civil.acte.mariage</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">etat_civil.report_acte_mariage</field>
+        <field name="report_file">etat_civil.report_acte_mariage</field>
+        <field name="binding_model_id" ref="model_etat_civil_acte_mariage"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_acte_deces" model="ir.actions.report">
+        <field name="name">Acte de Décès</field>
+        <field name="model">etat.civil.acte.deces</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">etat_civil.report_acte_deces</field>
+        <field name="report_file">etat_civil.report_acte_deces</field>
+        <field name="binding_model_id" ref="model_etat_civil_acte_deces"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_acte_naissance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Acte de Naissance</h2>
+                        <p><strong>Numéro d'acte :</strong> <span t-field="doc.numero_acte"/></p>
+                        <p t-if="doc.feuillet_numero"><strong>Numéro de feuillet :</strong> <span t-field="doc.feuillet_numero"/></p>
+                        <p><strong>Registre :</strong> <span t-field="doc.registre_id"/></p>
+                        <p><strong>Enfant :</strong> <span t-field="doc.enfant_id"/></p>
+                        <p t-if="doc.pere_id"><strong>Père :</strong> <span t-field="doc.pere_id"/></p>
+                        <p t-if="doc.mere_id"><strong>Mère :</strong> <span t-field="doc.mere_id"/></p>
+                        <p t-if="doc.lieu_naissance"><strong>Lieu de naissance :</strong> <span t-field="doc.lieu_naissance"/></p>
+                        <p t-if="doc.heure_naissance is not False"><strong>Heure de naissance :</strong> <span t-field="doc.heure_naissance" t-options="{'widget': 'float_time'}"/></p>
+                        <p t-if="doc.officier_validateur_id"><strong>Officier d'état civil :</strong> <span t-field="doc.officier_validateur_id.name"/></p>
+                        <p t-if="doc.date_validation"><strong>Date de validation :</strong> <span t-field="doc.date_validation"/></p>
+                        <div class="mt-3 p-2 border rounded" t-if="doc.hash_empreinte_num or doc.qr_code_image">
+                            <h6>Vérification d'intégrité numérique</h6>
+                            <p t-if="doc.hash_empreinte_num" class="mb-1"><strong>Empreinte SHA-256 :</strong> <code t-field="doc.hash_empreinte_num"/></p>
+                            <div t-if="doc.qr_code_image" class="mt-2">
+                                <img t-att-src="image_data_uri(doc.qr_code_image)" style="width: 110px; height: 110px;" alt="QR de vérification"/>
+                            </div>
+                            <small class="text-muted d-block mt-1"><em>Ce code de vérification permet de contrôler l'intégrité des mentions de l'acte et ne se substitue pas à la signature manuscrite de l'officier compétent.</em></small>
+                        </div>
+                        <h3 t-if="doc.mention_ids" class="mt-3">Mentions marginales</h3>
+                        <div t-foreach="doc.mention_ids" t-as="mention">
+                            <p><strong t-field="mention.type_mention"/> - <span t-field="mention.date_mention"/></p>
+                            <p t-field="mention.contenu"/>
+                        </div>
+                        <p class="mt-3"><strong>Texte intégral :</strong></p>
+                        <div t-field="doc.texte_integral_acte"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_acte_mariage">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Acte de Mariage</h2>
+                        <p><strong>Numéro d'acte :</strong> <span t-field="doc.numero_acte"/></p>
+                        <p t-if="doc.feuillet_numero"><strong>Numéro de feuillet :</strong> <span t-field="doc.feuillet_numero"/></p>
+                        <p><strong>Registre :</strong> <span t-field="doc.registre_id"/></p>
+                        <p><strong>Premier conjoint :</strong> <span t-field="doc.conjoint_1_id"/></p>
+                        <p><strong>Second conjoint :</strong> <span t-field="doc.conjoint_2_id"/></p>
+                        <p><strong>Date et lieu :</strong> <span t-field="doc.date_mariage"/> - <span t-field="doc.lieu_mariage"/></p>
+                        <p t-if="doc.temoin_1_id"><strong>Premier témoin :</strong> <span t-field="doc.temoin_1_id"/></p>
+                        <p t-if="doc.temoin_2_id"><strong>Second témoin :</strong> <span t-field="doc.temoin_2_id"/></p>
+                        <p t-if="doc.donnees_historiques_incompletes and (not doc.temoin_1_id or not doc.temoin_2_id)" class="text-warning">
+                            <em>Mention administrative : Acte historique importé avec témoins non renseignés dans les archives d'origine.</em>
+                        </p>
+                        <p t-if="doc.officier_validateur_id"><strong>Officier d'état civil :</strong> <span t-field="doc.officier_validateur_id.name"/></p>
+                        <p t-if="doc.date_validation"><strong>Date de validation :</strong> <span t-field="doc.date_validation"/></p>
+                        <div class="mt-3 p-2 border rounded" t-if="doc.hash_empreinte_num or doc.qr_code_image">
+                            <h6>Vérification d'intégrité numérique</h6>
+                            <p t-if="doc.hash_empreinte_num" class="mb-1"><strong>Empreinte SHA-256 :</strong> <code t-field="doc.hash_empreinte_num"/></p>
+                            <div t-if="doc.qr_code_image" class="mt-2">
+                                <img t-att-src="image_data_uri(doc.qr_code_image)" style="width: 110px; height: 110px;" alt="QR de vérification"/>
+                            </div>
+                            <small class="text-muted d-block mt-1"><em>Ce code de vérification permet de contrôler l'intégrité des mentions de l'acte et ne se substitue pas à la signature manuscrite de l'officier compétent.</em></small>
+                        </div>
+                        <h3 t-if="doc.mention_ids" class="mt-3">Mentions marginales</h3>
+                        <div t-foreach="doc.mention_ids" t-as="mention">
+                            <p><strong t-field="mention.type_mention"/> - <span t-field="mention.date_mention"/></p>
+                            <p t-field="mention.contenu"/>
+                        </div>
+                        <p class="mt-3"><strong>Texte intégral :</strong></p>
+                        <div t-field="doc.texte_integral_acte"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_acte_deces">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Acte de Décès</h2>
+                        <p><strong>Numéro d'acte :</strong> <span t-field="doc.numero_acte"/></p>
+                        <p t-if="doc.feuillet_numero"><strong>Numéro de feuillet :</strong> <span t-field="doc.feuillet_numero"/></p>
+                        <p><strong>Registre :</strong> <span t-field="doc.registre_id"/></p>
+                        <p><strong>Défunt :</strong> <span t-field="doc.defunt_id"/></p>
+                        <p><strong>Date et lieu :</strong> <span t-field="doc.date_deces"/> - <span t-field="doc.lieu_deces"/></p>
+                        <p t-if="doc.officier_validateur_id"><strong>Officier d'état civil :</strong> <span t-field="doc.officier_validateur_id.name"/></p>
+                        <p t-if="doc.date_validation"><strong>Date de validation :</strong> <span t-field="doc.date_validation"/></p>
+                        <div class="mt-3 p-2 border rounded" t-if="doc.hash_empreinte_num or doc.qr_code_image">
+                            <h6>Vérification d'intégrité numérique</h6>
+                            <p t-if="doc.hash_empreinte_num" class="mb-1"><strong>Empreinte SHA-256 :</strong> <code t-field="doc.hash_empreinte_num"/></p>
+                            <div t-if="doc.qr_code_image" class="mt-2">
+                                <img t-att-src="image_data_uri(doc.qr_code_image)" style="width: 110px; height: 110px;" alt="QR de vérification"/>
+                            </div>
+                            <small class="text-muted d-block mt-1"><em>Ce code de vérification permet de contrôler l'intégrité des mentions de l'acte et ne se substitue pas à la signature manuscrite de l'officier compétent.</em></small>
+                        </div>
+                        <h3 t-if="doc.mention_ids" class="mt-3">Mentions marginales</h3>
+                        <div t-foreach="doc.mention_ids" t-as="mention">
+                            <p><strong t-field="mention.type_mention"/> - <span t-field="mention.date_mention"/></p>
+                            <p t-field="mention.contenu"/>
+                        </div>
+                        <p class="mt-3"><strong>Texte intégral :</strong></p>
+                        <div t-field="doc.texte_integral_acte"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════════════
+         WIZARD : IMPORTATION DES CITOYENS
+         ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_etat_civil_import_wizard_form" model="ir.ui.view">
+        <field name="name">etat.civil.import.wizard.form</field>
+        <field name="model">etat.civil.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importer des citoyens">
+                <sheet>
+                    <!-- ÉTAPE 1 : Téléverser un fichier -->
+                    <div invisible="state != 'upload'">
+                        <div class="alert alert-info" role="alert">
+                            <i class="fa fa-upload me-2"/>
+                            <strong>Étape 1 :</strong> Sélectionnez un fichier de données à importer.
+                            Formats acceptés : CSV, XLSX, XLS, JSON, XML, ODS ou ZIP.
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="file_data" filename="file_name"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="file_format" readonly="1"/>
+                            <field name="duplicate_strategy" widget="radio"/>
+                        </group>
+                    </div>
+
+                    <!-- ÉTAPE 2 : Correspondance des colonnes -->
+                    <div invisible="state != 'mapping'">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fa fa-columns me-2"/>
+                            <strong>Étape 2 :</strong> Vérifiez et ajustez la correspondance entre les colonnes du fichier et les champs Odoo.
+                            Laissez vide pour ignorer une colonne.
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="column_mapping" widget="text"
+                                   placeholder='{"colonne_externe": "champ_odoo", ...}'
+                                   help="JSON : associez chaque colonne externe à un champ Odoo parmi : nom, prenoms, cin, sexe, date_naissance, lieu_naissance_commune, lieu_naissance_pays, nationalite_actuelle, domicile_actuel, profession_actuelle, statut_vital, situation_matrimoniale. Mettez une chaîne vide pour ignorer."/>
+                        </group>
+                        <div class="alert alert-secondary mt-2" role="alert">
+                            <strong>Colonnes détectées :</strong>
+                            <field name="detected_columns" readonly="1" widget="text"/>
+                        </div>
+                        <div class="mt-2 text-muted">
+                            <strong>Champs Odoo disponibles :</strong>
+                            nom, prenoms, cin, sexe, date_naissance, date_naissance_estimee,
+                            lieu_naissance_commune, lieu_naissance_pays, nationalite_actuelle,
+                            domicile_actuel, profession_actuelle, statut_vital, situation_matrimoniale
+                        </div>
+                    </div>
+
+                    <!-- ÉTAPE 3 : Aperçu -->
+                    <div invisible="state != 'preview'">
+                        <div class="alert alert-success" role="alert">
+                            <i class="fa fa-eye me-2"/>
+                            <strong>Étape 3 :</strong> Vérifiez l'aperçu des données ci-dessous avant de lancer l'importation.
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="preview_data" widget="text" readonly="1"
+                                   placeholder="Aperçu des premières lignes..."/>
+                        </group>
+                    </div>
+
+                    <!-- ÉTAPE 4 : Résultat -->
+                    <div invisible="state != 'done'">
+                        <div class="alert alert-primary" role="alert">
+                            <i class="fa fa-check-circle me-2"/>
+                            <strong>Importation terminée.</strong>
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="result_total"/>
+                            <field name="result_imported"/>
+                            <field name="result_updated"/>
+                            <field name="result_duplicates"/>
+                            <field name="result_skipped"/>
+                            <field name="result_errors"/>
+                        </group>
+                        <group string="Détails / Erreurs">
+                            <field name="result_details" widget="text" readonly="1"/>
+                        </group>
+                        <group string="Télécharger le rapport" invisible="not result_error_file">
+                            <field name="result_error_file" filename="result_error_file_name"/>
+                            <field name="result_error_file_name" invisible="1"/>
+                        </group>
+                    </div>
+                </sheet>
+                <footer>
+                    <!-- Étape 1 -->
+                    <button name="action_detect_columns" string="Suivant : Détecter les colonnes"
+                            type="object" class="btn-primary" invisible="state != 'upload'"/>
+                    <!-- Étape 2 -->
+                    <button name="action_back_to_upload" string="← Retour" type="object"
+                            class="btn-secondary" invisible="state != 'mapping'"/>
+                    <button name="action_preview" string="Suivant : Aperçu"
+                            type="object" class="btn-primary" invisible="state != 'mapping'"/>
+                    <!-- Étape 3 -->
+                    <button name="action_back_to_mapping" string="← Retour" type="object"
+                            class="btn-secondary" invisible="state != 'preview'"/>
+                    <button name="action_import" string="Lancer l'importation"
+                            type="object" class="btn-success" invisible="state != 'preview'"
+                            confirm="Êtes-vous sûr de vouloir lancer l'importation ? Cette action créera ou mettra à jour des citoyens."/>
+                    <!-- Toutes les étapes -->
+                    <button string="Fermer" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_import_wizard" model="ir.actions.act_window">
+        <field name="name">Importer des citoyens</field>
+        <field name="res_model">etat.civil.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_etat_civil_individu"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         WIZARD : EXPORTATION DES CITOYENS
+         ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_etat_civil_export_wizard_form" model="ir.ui.view">
+        <field name="name">etat.civil.export.wizard.form</field>
+        <field name="model">etat.civil.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Exporter des citoyens">
+                <sheet>
+                    <!-- Configuration -->
+                    <div invisible="state != 'config'">
+                        <div class="alert alert-info" role="alert">
+                            <i class="fa fa-download me-2"/>
+                            Configurez les paramètres d'exportation puis cliquez sur « Exporter ».
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="export_format" widget="radio"/>
+                            <field name="export_filter" widget="radio"/>
+                            <field name="include_fields" widget="radio"/>
+                        </group>
+                    </div>
+
+                    <!-- Résultat -->
+                    <div invisible="state != 'done'">
+                        <div class="alert alert-success" role="alert">
+                            <i class="fa fa-check-circle me-2"/>
+                            <strong>Exportation terminée.</strong>
+                            <field name="result_count" class="d-inline"/> citoyen(s) exporté(s).
+                        </div>
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="result_file" filename="result_file_name"/>
+                            <field name="result_file_name" invisible="1"/>
+                        </group>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_export" string="Exporter" type="object"
+                            class="btn-primary" invisible="state != 'config'"/>
+                    <button string="Fermer" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_export_wizard" model="ir.actions.act_window">
+        <field name="name">Exporter des citoyens</field>
+        <field name="res_model">etat.civil.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_etat_civil_individu"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+</odoo>

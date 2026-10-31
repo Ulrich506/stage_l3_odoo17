@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_etat_civil_demande_guichet_tree" model="ir.ui.view">
+        <field name="name">etat.civil.demande.guichet.tree</field>
+        <field name="model">etat.civil.demande.guichet</field>
+        <field name="arch" type="xml">
+            <tree string="File d'attente du guichet" default_order="priorite desc, create_date asc">
+                <field name="ticket_numero"/>
+                <field name="citoyen_nom"/>
+                <field name="citoyen_cin" string="CIN"/>
+                <field name="type_acte"/>
+                <field name="type_demande"/>
+                <field name="priorite" widget="badge"/>
+                <field name="statut" widget="badge"/>
+                <field name="create_date"/>
+                <field name="processed_at"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_etat_civil_demande_guichet_form" model="ir.ui.view">
+        <field name="name">etat.civil.demande.guichet.form</field>
+        <field name="model">etat.civil.demande.guichet</field>
+        <field name="arch" type="xml">
+            <form string="Demande au guichet">
+                <header>
+                    <button name="action_appeler_au_guichet" type="object"
+                            string="Appeler au guichet" class="oe_highlight"/>
+                    <button name="action_marquer_traite" type="object"
+                            string="Marquer traité"/>
+                    <button name="action_annuler_ticket" type="object"
+                            string="Annuler"/>
+                    <field name="statut" widget="statusbar" readonly="1"
+                           statusbar_visible="en_attente,en_cours,traite"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="ticket_numero"/>
+                        <h1><field name="ticket_numero"/></h1>
+                    </div>
+                    <group>
+                        <group string="Citoyen">
+                            <field name="citoyen_nom"/>
+                            <field name="citoyen_cin" string="CIN"/>
+                        </group>
+                        <group string="Demande">
+                            <field name="type_acte"/>
+                            <field name="type_demande"/>
+                            <field name="priorite"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="create_date" readonly="1"/>
+                        <field name="processed_at" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_demandes_guichet" model="ir.actions.act_window">
+        <field name="name">File d'attente</field>
+        <field name="res_model">etat.civil.demande.guichet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_en_attente': 1}</field>
+    </record>
+
+    <record id="view_etat_civil_demande_guichet_search" model="ir.ui.view">
+        <field name="name">etat.civil.demande.guichet.search</field>
+        <field name="model">etat.civil.demande.guichet</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher dans la file d'attente">
+                <field name="ticket_numero"/>
+                <field name="citoyen_nom"/>
+                <field name="citoyen_cin" string="CIN"/>
+                <filter name="en_attente" string="En attente"
+                        domain="[('statut', '=', 'en_attente')]"/>
+                <filter name="en_cours" string="Au guichet"
+                        domain="[('statut', '=', 'en_cours')]"/>
+                <filter name="traite" string="Traités"
+                        domain="[('statut', '=', 'traite')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_statut" string="Statut" context="{'group_by': 'statut'}"/>
+                    <filter name="group_priorite" string="Priorité" context="{'group_by': 'priorite'}"/>
+                    <filter name="group_type_acte" string="Type d'acte" context="{'group_by': 'type_acte'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

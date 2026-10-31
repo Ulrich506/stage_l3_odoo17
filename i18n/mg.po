@@ -1,0 +1,345 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: mg\n"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_root
+msgid "État Civil"
+msgstr "Sata-piankohonana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_guichet
+msgid "File d'attente"
+msgstr "Filaharana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_actes
+msgid "Actes"
+msgstr "Taratasy ara-panjakana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_acte_naissance
+msgid "Naissances"
+msgstr "Fahaterahana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_acte_mariage
+msgid "Mariages"
+msgstr "Fanambadiana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_acte_deces
+msgid "Décès"
+msgstr "Fahafatesana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_mentions
+msgid "Mentions marginales"
+msgstr "Fanamarihana an-tsisiny"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_citoyens
+msgid "Citoyens / Individus"
+msgstr "Olom-pirenena"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_config
+msgid "Administration"
+msgstr "Fitantanana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_registres
+msgid "Registres"
+msgstr "Bokim-pisoratana"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_centres
+msgid "Centres d'état civil"
+msgstr "Foibem-panjakana sivily"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_users
+msgid "Utilisateurs"
+msgstr "Mpampiasa"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__cin
+msgid "Carte d'Identité Nationale (CIN)"
+msgstr "Kara-panondrom-pirenena (CIN)"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__citoyen_cin
+msgid "CIN"
+msgstr "CIN"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__nom
+msgid "Nom"
+msgstr "Anarana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__prenoms
+msgid "Prénoms"
+msgstr "Fanampin'anarana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__date_naissance
+msgid "Date de naissance"
+msgstr "Daty nahaterahana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__sexe
+msgid "Sexe"
+msgstr "Lahy sa vavy"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__statut_vital
+msgid "Statut vital"
+msgstr "Toetry ny fiainana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_individu__situation_matrimoniale
+msgid "Situation matrimoniale"
+msgstr "Sata ara-panambadiana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__citoyen_nom
+msgid "Nom du citoyen"
+msgstr "Anaran'ny olom-pirenena"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__ticket_numero
+msgid "Numéro de ticket"
+msgstr "Laharan'ny tapakila"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__statut
+msgid "Statut"
+msgstr "Sata"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__priorite
+msgid "Priorité"
+msgstr "Laharam-pahamehana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__processed_at
+msgid "Date de traitement"
+msgstr "Daty nanaovana fikarakarana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_acte_naissance__filiation
+msgid "Filiation établie"
+msgstr "Ray aman-dreny voafaritra"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_acte_naissance__filiation
+msgid "Filiation à préciser"
+msgstr "Mbola hofaritana ny ray aman-dreny"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_acte_mariage__conjoint_1_capacite_requise
+msgid "Capacité matrimoniale requise"
+msgstr "Taratasy fahafahana manambady takiana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_acte_mariage__conjoint_1_residence_etranger_requise
+msgid "Résidence requise"
+msgstr "Taratasy fonenana takiana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__type_acte
+msgid "Type d'acte"
+msgstr "Karazana taratasy"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__type_demande
+msgid "Type de demande"
+msgstr "Karazana fangatahana"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__statut
+msgid "En attente"
+msgstr "Miandry"
+
+#. module: etat_civil
+msgid "Au guichet"
+msgstr "Eo am-pandraisana"
+
+#. module: etat_civil
+msgid "Traité"
+msgstr "Voakarakara"
+
+#. module: etat_civil
+#: model:ir.model.fields,field_description:etat_civil.field_etat_civil_demande_guichet__priorite
+msgid "Normale"
+msgstr "Mahazatra"
+
+#. module: etat_civil
+msgid "Prioritaire"
+msgstr "Laharam-pahamehana"
+
+#. module: etat_civil
+msgid "Urgente"
+msgstr "Maika"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_form
+msgid "Appeler au guichet"
+msgstr "Antsoy eo amin'ny kaontera"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_form
+msgid "Marquer traité"
+msgstr "Mariho fa voakarakara"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_form
+msgid "Annuler"
+msgstr "Hanafoana"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_form
+msgid "Citoyen"
+msgstr "Olom-pirenena"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_form
+msgid "Demande"
+msgstr "Fangatahana"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_search
+msgid "Rechercher dans la file d'attente"
+msgstr "Hikaroka ao amin'ny filaharana"
+
+#. module: etat_civil
+#: model:ir.ui.view,arch_db:etat_civil.view_etat_civil_demande_guichet_search
+msgid "Grouper par"
+msgstr "Vondrona araka ny"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_a_valider
+msgid "Dossiers à examiner"
+msgstr "Taratasy hojerena"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_naissance_a_valider
+msgid "Naissances à examiner"
+msgstr "Fahaterahana hojerena"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_mariage_a_valider
+msgid "Mariages à examiner"
+msgstr "Fanambadiana hojerena"
+
+#. module: etat_civil
+#: model:ir.ui.menu,name:etat_civil.menu_etat_civil_deces_a_valider
+msgid "Décès à examiner"
+msgstr "Fahafatesana hojerena"
+
+#. module: etat_civil
+msgid "À examiner"
+msgstr "Hojerena"
+
+#. module: etat_civil
+msgid "Assignés à moi"
+msgstr "Omena ahy"
+
+#. module: etat_civil
+msgid "Traités"
+msgstr "Efa voakarakara"
+
+#. module: etat_civil
+msgid "Le dossier a été transmis à l'officier compétent."
+msgstr "Ny taratasy dia nalefa tamin’ny tompon’andraikitra mahefa."
+
+#. module: etat_civil
+msgid "Envoyer pour validation"
+msgstr "Handefa hankatoavina"
+
+#. module: etat_civil
+msgid "En attente de validation"
+msgstr "Miandry fankatoavana"
+
+#. module: etat_civil
+msgid "À corriger"
+msgstr "Harenina"
+
+#. module: etat_civil
+msgid "Renvoyer pour correction"
+msgstr "Hamerina harenina"
+
+#. module: etat_civil
+msgid "Refuser"
+msgstr "Andavana"
+
+#. module: etat_civil
+msgid "Valider l'acte"
+msgstr "Hankatoa ny taratasy"
+
+#. module: etat_civil
+msgid "Agent transmetteur"
+msgstr "Mpiasam-panjakana nanefa"
+
+#. module: etat_civil
+msgid "Date de transmission"
+msgstr "Daty nandefa"
+
+#. module: etat_civil
+msgid "Officier validateur"
+msgstr "Tompon'andraikitra nankatoa"
+
+#. module: etat_civil
+msgid "Date de validation"
+msgstr "Daty fankatoavana"
+
+#. module: etat_civil
+msgid "Motif de correction"
+msgstr "Antony namerenan-dresa"
+
+#. module: etat_civil
+msgid "Motif du refus"
+msgstr "Antony nanadavana"
+
+#. module: etat_civil
+msgid "Notes de transmission"
+msgstr "Fanamarihana momba ny fandefasana"
+
+#. module: etat_civil
+msgid "Brouillon"
+msgstr "Taratasy vontoaty"
+
+#. module: etat_civil
+msgid "Validé"
+msgstr "Voakatoa"
+
+#. module: etat_civil
+msgid "Annulé"
+msgstr "Voafoanana"
+
+#. module: etat_civil
+msgid "Archivé"
+msgstr "Voarakitra"
+
+#. module: etat_civil
+msgid "À valider"
+msgstr "Hankatoavina"
+
+#. module: etat_civil
+msgid "Le dossier a été transmis pour validation."
+msgstr "Ny taratasy dia nalefa hankatoavina."
+
+#. module: etat_civil
+msgid "Aucun officier compétent n'a été trouvé pour ce dossier."
+msgstr "Tsy hita tompon'andraikitra mahefa ho an'ity taratasy ity."
+
+#. module: etat_civil
+msgid "Sélectionnez un officier compétent pour ce dossier."
+msgstr "Misafidiana tompon'andraikitra mahefa ho an'ity taratasy ity."
+
+#. module: etat_civil
+msgid "Ce dossier est déjà en attente de validation."
+msgstr "Ity taratasy ity efa miandry fankatoavana."

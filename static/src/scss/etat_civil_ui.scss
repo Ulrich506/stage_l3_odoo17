@@ -1,0 +1,48 @@
+.ec_form_view .oe_title h1,
+.ec_form_view .oe_title h1 input {
+    color: #0f172a;
+}
+
+.ec_form_view .ec_subtitle {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.ec_form_view .ec_section {
+    margin-top: 8px;
+    margin-bottom: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.ec_form_view .ec_form_hint {
+    margin: 12px 0 20px;
+    border-radius: 8px;
+}
+
+.ec_form_view .ec_qr_image {
+    max-width: 180px;
+    max-height: 180px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.ec_list_view .o_list_table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.ec_kanban_card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    background: #ffffff;
+}
+
+.ec_kanban_card:hover {
+    box-shadow: 0 4px 6px rgba(15, 23, 42, .07), 0 2px 4px rgba(15, 23, 42, .04);
+    transform: translateY(-1px);
+}

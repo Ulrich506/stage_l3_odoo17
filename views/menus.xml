@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_etat_civil_root" name="État Civil" web_icon="etat_civil,static/description/icon.png" groups="etat_civil.group_etat_civil_agent" sequence="10"/>
+    <menuitem id="menu_etat_civil_guichet" name="File d'attente" parent="menu_etat_civil_root" action="action_etat_civil_demandes_guichet" groups="etat_civil.group_etat_civil_agent" sequence="5"/>
+    <menuitem id="menu_etat_civil_a_valider" name="Dossiers à examiner" parent="menu_etat_civil_root" groups="etat_civil.group_etat_civil_officier" sequence="8"/>
+    <menuitem id="menu_etat_civil_naissance_a_valider" name="Naissances à examiner" parent="menu_etat_civil_a_valider" action="action_etat_civil_acte_naissance_a_valider" sequence="10"/>
+    <menuitem id="menu_etat_civil_mariage_a_valider" name="Mariages à examiner" parent="menu_etat_civil_a_valider" action="action_etat_civil_acte_mariage_a_valider" sequence="20"/>
+    <menuitem id="menu_etat_civil_deces_a_valider" name="Décès à examiner" parent="menu_etat_civil_a_valider" action="action_etat_civil_acte_deces_a_valider" sequence="30"/>
+    <menuitem id="menu_etat_civil_actes" name="Actes" parent="menu_etat_civil_root" sequence="10"/>
+    <menuitem id="menu_etat_civil_acte_naissance" name="Naissances" parent="menu_etat_civil_actes" action="action_etat_civil_acte_naissance" sequence="10"/>
+    <menuitem id="menu_etat_civil_acte_mariage" name="Mariages" parent="menu_etat_civil_actes" action="action_etat_civil_acte_mariage" sequence="20"/>
+    <menuitem id="menu_etat_civil_acte_deces" name="Décès" parent="menu_etat_civil_actes" action="action_etat_civil_acte_deces" sequence="30"/>
+    <menuitem id="menu_etat_civil_mentions" name="Mentions marginales" parent="menu_etat_civil_actes" action="action_etat_civil_mention_marginale" sequence="40"/>
+
+    <menuitem id="menu_etat_civil_referentiels" name="Référentiels" parent="menu_etat_civil_root" sequence="20"/>
+    <menuitem id="menu_etat_civil_citoyens" name="Citoyens / Individus" parent="menu_etat_civil_referentiels" action="action_etat_civil_individu" sequence="10"/>
+    <menuitem id="menu_etat_civil_citoyens_import" name="Importer des citoyens" parent="menu_etat_civil_referentiels" action="action_etat_civil_import_wizard" sequence="20"/>
+    <menuitem id="menu_etat_civil_citoyens_export" name="Exporter des citoyens" parent="menu_etat_civil_referentiels" action="action_etat_civil_export_wizard" sequence="30"/>
+
+    <menuitem id="menu_etat_civil_config" name="Administration" parent="menu_etat_civil_root" groups="etat_civil.group_etat_civil_admin" sequence="90"/>
+    <menuitem id="menu_etat_civil_registres" name="Registres" parent="menu_etat_civil_config" action="action_etat_civil_registre" sequence="10"/>
+    <menuitem id="menu_etat_civil_centres" name="Centres d'état civil" parent="menu_etat_civil_config" action="action_etat_civil_centre" sequence="20"/>
+    <menuitem id="menu_etat_civil_users" name="Utilisateurs" parent="menu_etat_civil_config" sequence="30"/>
+    <menuitem id="menu_etat_civil_users_create" name="Créer un utilisateur" parent="menu_etat_civil_users" action="action_etat_civil_user_create" groups="etat_civil.group_etat_civil_admin" sequence="10"/>
+    <menuitem id="menu_etat_civil_users_manage" name="Gérer un compte" parent="menu_etat_civil_users" action="action_etat_civil_user_manage" groups="etat_civil.group_etat_civil_admin" sequence="20"/>
+</odoo>

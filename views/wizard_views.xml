@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- WIZARD ANNULATION -->
+    <record id="view_etat_civil_annulation_acte_wizard" model="ir.ui.view">
+        <field name="name">etat.civil.annulation.acte.wizard.form</field>
+        <field name="model">etat.civil.annulation.acte.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Annuler l'acte">
+                <sheet>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Attention :</strong> cette action rend l'acte inutilisable pour les opérations normales.
+                    </div>
+                    <group>
+                        <field name="acte_type" invisible="1"/>
+                        <field name="acte_id" invisible="1"/>
+                        <field name="acte_display" readonly="1"/>
+                        <field name="motif" placeholder="Expliquez clairement la raison de l'annulation..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirmer" string="Confirmer l'annulation" type="object" class="btn-danger"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_annulation_acte_wizard" model="ir.actions.act_window">
+        <field name="name">Annuler un acte</field>
+        <field name="res_model">etat.civil.annulation.acte.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- WIZARD TRANSMISSION À UN OFFICIER -->
+    <record id="view_etat_civil_transmission_acte_wizard" model="ir.ui.view">
+        <field name="name">etat.civil.transmission.acte.wizard.form</field>
+        <field name="model">etat.civil.transmission.acte.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Envoyer pour validation">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        Sélectionnez l'officier compétent pour vérifier et valider ce document d'état civil.
+                    </div>
+                    <group>
+                        <field name="acte_type" invisible="1"/>
+                        <field name="acte_id" invisible="1"/>
+                        <field name="available_officier_ids" invisible="1"/>
+                        <field name="acte_display" readonly="1"/>
+                        <field name="centre_id" readonly="1"/>
+                        <field name="officier_id" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="notes" placeholder="Observations ou message éventuel pour l'officier..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirmer_transmission" string="Envoyer pour validation" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_transmission_acte_wizard" model="ir.actions.act_window">
+        <field name="name">Envoyer pour validation</field>
+        <field name="res_model">etat.civil.transmission.acte.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- WIZARD RETOUR POUR CORRECTION OU REFUS -->
+    <record id="view_etat_civil_retour_correction_wizard" model="ir.ui.view">
+        <field name="name">etat.civil.retour.correction.wizard.form</field>
+        <field name="model">etat.civil.retour.correction.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Décision sur le dossier">
+                <sheet>
+                    <group>
+                        <field name="acte_type" invisible="1"/>
+                        <field name="acte_id" invisible="1"/>
+                        <field name="action_type" widget="radio"/>
+                        <field name="acte_display" readonly="1"/>
+                        <field name="motif" placeholder="Précisez les corrections à apporter par l'agent ou le motif du refus..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirmer" string="Confirmer la décision" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_retour_correction_wizard" model="ir.actions.act_window">
+        <field name="name">Décision de l'officier</field>
+        <field name="res_model">etat.civil.retour.correction.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

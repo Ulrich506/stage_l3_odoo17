@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- CITOYENS / INDIVIDUS -->
+    <record id="view_etat_civil_individu_search" model="ir.ui.view">
+        <field name="name">etat.civil.individu.search</field>
+        <field name="model">etat.civil.individu</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher un citoyen">
+                <field name="nom_complet" string="Nom complet"/>
+                <field name="cin" string="CIN"/>
+                <field name="nom"/>
+                <field name="prenoms"/>
+                <field name="sexe"/>
+                <field name="statut_vital"/>
+                <separator/>
+                <filter name="vivants" string="Vivant" domain="[('statut_vital','=','vivant')]"/>
+                <filter name="decedes" string="Décédé" domain="[('statut_vital','=','decede')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_sexe" string="Sexe" context="{'group_by':'sexe'}"/>
+                    <filter name="group_vital" string="Statut vital" context="{'group_by':'statut_vital'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_etat_civil_individu_tree" model="ir.ui.view">
+        <field name="name">etat.civil.individu.tree</field>
+        <field name="model">etat.civil.individu</field>
+        <field name="arch" type="xml">
+            <tree string="Citoyens" decoration-muted="statut_vital == 'decede'">
+                <field name="cin" string="CIN"/>
+                <field name="nom_complet" string="Nom complet"/>
+                <field name="sexe"/>
+                <field name="date_naissance"/>
+                <field name="lieu_naissance_commune" optional="show"/>
+                <field name="statut_vital" widget="badge" decoration-success="statut_vital == 'vivant'" decoration-danger="statut_vital == 'decede'" decoration-warning="statut_vital == 'disparu'"/>
+                <field name="situation_matrimoniale" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Formulaire général citoyen (adultes et enfants existants) -->
+    <record id="view_etat_civil_individu_form" model="ir.ui.view">
+        <field name="name">etat.civil.individu.form</field>
+        <field name="model">etat.civil.individu</field>
+        <field name="arch" type="xml">
+            <form string="Fiche citoyen">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="nom_complet" class="oe_edit_only"/>
+                        <h1><field name="nom_complet" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Identité">
+                            <field name="cin_non_requise" invisible="1"/>
+                            <field name="cin" placeholder="Numéro de CIN (12 chiffres)"
+                                   readonly="cin_non_requise"
+                                   help="La CIN n'est pas requise avant 18 ans."/>
+                            <field name="nom"/>
+                            <field name="prenoms"/>
+                            <field name="sexe"/>
+                            <field name="nationalite_actuelle"/>
+                        </group>
+                        <group string="Naissance">
+                            <field name="date_naissance"/>
+                            <field name="date_naissance_estimee"/>
+                            <field name="lieu_naissance_commune"/>
+                            <field name="lieu_naissance_pays"/>
+                        </group>
+                    </group>
+                    <group string="Situation actuelle">
+                        <group>
+                            <field name="statut_vital"/>
+                            <field name="situation_matrimoniale" invisible="cin_non_requise"/>
+                        </group>
+                        <group>
+                            <field name="profession_actuelle" invisible="cin_non_requise"/>
+                            <field name="domicile_actuel"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Formulaire dédié pour l'enregistrement d'un enfant nouveau-né.
+         Pas de CIN, pas de profession, situation matrimoniale = célibataire par défaut. -->
+    <record id="view_etat_civil_individu_form_nouveau_ne" model="ir.ui.view">
+        <field name="name">etat.civil.individu.form.nouveau_ne</field>
+        <field name="model">etat.civil.individu</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Créer Enfant Nouveau-né">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="nom_complet" class="oe_edit_only"/>
+                        <h1><field name="nom_complet" readonly="1"/></h1>
+                    </div>
+                    <!-- Section A : Identité de l'enfant -->
+                    <group string="Identité de l'enfant">
+                        <group>
+                            <field name="nom" required="1"/>
+                            <field name="prenoms"/>
+                            <field name="sexe" required="1"/>
+                            <field name="nationalite_actuelle"/>
+                        </group>
+                        <group>
+                            <field name="date_naissance" required="1"/>
+                            <field name="date_naissance_estimee"/>
+                            <field name="lieu_naissance_commune"/>
+                            <field name="lieu_naissance_pays"/>
+                            <field name="domicile_actuel"/>
+                        </group>
+                    </group>
+                    <!-- Section B : Situation de l'enfant -->
+                    <group string="Situation de l'enfant">
+                        <group>
+                            <field name="statut_vital"/>
+                            <field name="situation_matrimoniale" readonly="1"/>
+                        </group>
+                    </group>
+                    <!-- Section C : Identification (CIN optionnelle) -->
+                    <group string="Identification">
+                        <group>
+                            <field name="cin" placeholder="Optionnel — laisser vide si aucune CIN n'existe"
+                                   help="La CIN personnelle de l'enfant est facultative. Si aucune CIN n'existe, ce champ doit rester vide."/>
+                        </group>
+                    </group>
+                    <!-- Profession masquée pour un nouveau-né -->
+                    <field name="profession_actuelle" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour créer un nouveau-né avec le formulaire dédié -->
+    <record id="action_etat_civil_individu_nouveau_ne" model="ir.actions.act_window">
+        <field name="name">Créer Enfant Nouveau-né</field>
+        <field name="res_model">etat.civil.individu</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_etat_civil_individu_form_nouveau_ne"/>
+        <field name="context">{
+            'default_situation_matrimoniale': 'celibataire',
+            'default_statut_vital': 'vivant',
+            'form_view_ref': 'etat_civil.view_etat_civil_individu_form_nouveau_ne',
+        }</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_etat_civil_individu" model="ir.actions.act_window">
+        <field name="name">Citoyens</field>
+        <field name="res_model">etat.civil.individu</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_etat_civil_individu_search"/>
+    </record>
+</odoo>

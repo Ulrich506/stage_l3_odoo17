@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- CENTRES D'ÉTAT CIVIL -->
+    <record id="view_etat_civil_centre_tree" model="ir.ui.view">
+        <field name="name">etat.civil.centre.tree</field>
+        <field name="model">etat.civil.centre</field>
+        <field name="arch" type="xml">
+            <tree string="Centres d'état civil">
+                <field name="code_centre"/>
+                <field name="nom_centre"/>
+                <field name="commune"/>
+                <field name="district_province"/>
+                <field name="pays"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_etat_civil_centre_form" model="ir.ui.view">
+        <field name="name">etat.civil.centre.form</field>
+        <field name="model">etat.civil.centre</field>
+        <field name="arch" type="xml">
+            <form string="Centre d'état civil">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="nom_centre" placeholder="Nom du centre"/></h1>
+                    </div>
+                    <group>
+                        <group string="Identification">
+                            <field name="code_centre"/>
+                            <field name="nom_centre"/>
+                        </group>
+                        <group string="Localisation">
+                            <field name="commune"/>
+                            <field name="district_province"/>
+                            <field name="pays"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_centre" model="ir.actions.act_window">
+        <field name="name">Centres d'état civil</field>
+        <field name="res_model">etat.civil.centre</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- REGISTRES ANNUELS -->
+    <record id="view_etat_civil_registre_tree" model="ir.ui.view">
+        <field name="name">etat.civil.registre.tree</field>
+        <field name="model">etat.civil.registre</field>
+        <field name="arch" type="xml">
+            <tree string="Registres annuels">
+                <field name="designation"/>
+                <field name="annee"/>
+                <field name="type_registre"/>
+                <field name="numero_volume"/>
+                <field name="centre_id"/>
+                <field name="date_ouverture"/>
+                <field name="date_cloture" optional="show"/>
+                <field name="est_cloture" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_etat_civil_registre_form" model="ir.ui.view">
+        <field name="name">etat.civil.registre.form</field>
+        <field name="model">etat.civil.registre</field>
+        <field name="arch" type="xml">
+            <form string="Registre annuel">
+                <header>
+                    <button name="action_cloturer_registre" string="Clôturer" type="object" class="btn-primary" invisible="est_cloture" groups="etat_civil.group_etat_civil_admin" confirm="Clôturer ce registre ? Plus aucun acte ne pourra y être rattaché tant qu'il n'est pas rouvert."/>
+                    <button name="action_rouvrir_registre" string="Rouvrir" type="object" class="btn-secondary" invisible="not est_cloture" groups="etat_civil.group_etat_civil_admin" confirm="Rouvrir ce registre clôturé ?"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="designation" readonly="1"/></h1></div>
+                    <group>
+                        <group string="Identification">
+                            <field name="annee"/>
+                            <field name="type_registre"/>
+                            <field name="numero_volume"/>
+                            <field name="centre_id"/>
+                        </group>
+                        <group string="Période">
+                            <field name="date_ouverture"/>
+                            <field name="date_cloture"/>
+                            <field name="est_cloture"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_etat_civil_registre" model="ir.actions.act_window">
+        <field name="name">Registres</field>
+        <field name="res_model">etat.civil.registre</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
